@@ -93,6 +93,54 @@
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
+  // ── Selection UI ──────────────────────────────────────────────────
+
+  function showSelectionUI(items) {
+    return new Promise((resolve) => {
+      const checked = new Set(items.map((_, i) => i));
+      const container = document.createElement("div");
+      container.id = "pxe-select";
+      const itemRows = items.map((item, i) => {
+        const title = item.title || item.query_str || "Untitled";
+        return `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:#cbd5e1">
+          <input type="checkbox" checked data-idx="${i}" style="accent-color:#8b5cf6;width:15px;height:15px">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(title)}</span>
+        </label>`;
+      }).join("");
+      container.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif">
+        <div style="background:#1e293b;border-radius:16px;padding:32px;max-width:500px;width:90%;color:#e2e8f0;box-shadow:0 25px 50px rgba(0,0,0,0.4);max-height:80vh;display:flex;flex-direction:column">
+          <h2 style="margin:0 0 8px;font-size:18px;color:#f8fafc">Select threads</h2>
+          <p id="pxe-sel-count" style="color:#94a3b8;font-size:13px;margin:0 0 4px">${items.length} selected</p>
+          <div style="margin-bottom:8px">
+            <button id="pxe-sel-all" style="background:#334155;border:none;color:#e2e8f0;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;margin-right:6px">Select All</button>
+            <button id="pxe-sel-none" style="background:#334155;border:none;color:#e2e8f0;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px">Clear</button>
+          </div>
+          <div style="overflow-y:auto;flex:1;margin-bottom:16px;border:1px solid #334155;border-radius:8px;padding:8px 12px">${itemRows}</div>
+          <button id="pxe-sel-go" style="width:100%;padding:12px;border:none;border-radius:8px;background:#8b5cf6;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Export Selected</button>
+        </div>
+      </div>`;
+      document.body.appendChild(container);
+
+      const checkboxes = container.querySelectorAll("input[type=checkbox]");
+      const countEl = container.querySelector("#pxe-sel-count");
+      const updateCount = () => {
+        const n = container.querySelectorAll("input[type=checkbox]:checked").length;
+        countEl.textContent = n + " selected";
+      };
+      const setAll = (v) => { checkboxes.forEach(cb => { cb.checked = v; }); updateCount(); };
+
+      container.querySelector("#pxe-sel-all").onclick = () => setAll(true);
+      container.querySelector("#pxe-sel-none").onclick = () => setAll(false);
+      container.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = updateCount);
+      container.querySelector("#pxe-sel-go").onclick = () => {
+        const idxs = [];
+        checkboxes.forEach((cb, i) => { if (cb.checked) idxs.push(i); });
+        container.remove();
+        resolve(idxs.map(i => items[i]));
+      };
+    });
+  }
+
   // ── Fetch thread list ─────────────────────────────────────────────────
 
   ui.set("Fetching thread list...");
@@ -127,17 +175,25 @@
     return;
   }
 
-  ui.set(`Found ${threads.length} threads. Downloading...`);
+  // ── Selection UI ───────────────────────────────────────────────────
 
-  // ── Pass 1: Download all threads ─────────────────────────────────────
+  const selected = await showSelectionUI(threads);
+  if (!selected.length) {
+    ui.done("Nothing selected. Export cancelled.");
+    return;
+  }
+
+  ui.set(`Downloading ${selected.length} thread(s)...`);
+
+  // ── Pass 1: Download threads ────────────────────────────────────────
 
   const zipEntries = [];
   let failed = 0;
-  const total = threads.length;
+  const total = selected.length;
   const downloaded = [];
 
   for (let i = 0; i < total; i++) {
-    const { uuid, query_str, title: rawTitle, updated_at, slug } = threads[i];
+    const { uuid, query_str, title: rawTitle, updated_at, slug } = selected[i];
     const title = rawTitle || query_str || "Untitled";
     const safeTitle = sanitize(title);
     const fname = `${safeTitle}_${uuid ? uuid.slice(0, 8) : i}`;
