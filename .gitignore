@@ -1,0 +1,15 @@
+# Exported conversations
+chatgpt-export/
+perplexity-export/
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# CommandCode
+.commandcode/
