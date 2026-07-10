@@ -19,7 +19,8 @@ Export all your conversations from ChatGPT and Perplexity as **JSON + Markdown +
 1. Go to [chatgpt.com](https://chatgpt.com) and log in
 2. Open the console: **F12 → Console**
 3. Paste [`export-chatgpt-console.js`](https://raw.githubusercontent.com/ocombe/AI-Conversation-Exporters/main/export-chatgpt-console.js) and press Enter
-4. Wait for the ZIP to download
+4. Select the conversations you want (or Select All) → click **Export Selected**
+5. Wait for the ZIP to download
 
 ### Terminal
 
@@ -38,7 +39,8 @@ Opens a web UI → paste your session token → done. Requires Node.js 18+ or Py
 1. Go to [perplexity.ai](https://www.perplexity.ai) and log in
 2. Open the console: **F12 → Console**
 3. Paste [`export-perplexity-console.js`](https://raw.githubusercontent.com/ocombe/AI-Conversation-Exporters/main/export-perplexity-console.js) and press Enter
-4. Wait for the ZIP to download
+4. Select the threads you want (or Select All) → click **Export Selected**
+5. Wait for the ZIP to download
 
 ### Terminal
 
