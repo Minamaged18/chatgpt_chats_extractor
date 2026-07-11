@@ -31,7 +31,7 @@ Go to the site and **log in**.
 
 ### 3. Open the console and paste
 
-Press **F12** → **Console** tab, then paste:
+Press **F12** → **Console** tab. If you see `Type "allow pasting"`, type that first and press Enter. Then paste the one-liner:
 
 **For ChatGPT:**
 ```js
@@ -82,7 +82,7 @@ Opens a web UI where you paste your token/cookie. Exports everything (no selecti
 
 | Problem | Fix |
 |---------|-----|
-| `Unexpected token 'export'` | Don't paste raw code — use the `fetch(...).then(...).then(eval)` one-liner above |
+| `Unexpected token 'export'` | Chrome blocks pasting. Type `allow pasting` in the console first, then paste the one-liner |
 | `ERR_CONNECTION_REFUSED` | Make sure `python3 serve.py` is running |
 | `Failed to fetch` / CORS error | Make sure you're using `http://127.0.0.1:8425` (not `localhost`) |
 | 403 error (terminal mode) | Cloudflare blocking — use the browser console method instead |
