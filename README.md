@@ -1,6 +1,6 @@
 # ChatGPT & Perplexity Conversation Exporters
 
-Export all your conversations from ChatGPT and Perplexity as **JSON + Markdown + HTML + ZIP**.
+Export all your conversations from ChatGPT and Perplexity as **JSON + Markdown + HTML + ZIP** — pick individual chats or export everything.
 
 | Feature | ChatGPT | Perplexity |
 |---------|:-------:|:----------:|
@@ -13,55 +13,39 @@ Export all your conversations from ChatGPT and Perplexity as **JSON + Markdown +
 
 ---
 
-## ChatGPT
+## How to use
 
-### Browser Console (no server needed)
-
-1. Go to [chatgpt.com](https://chatgpt.com) and **log in**
-2. Press **F12** → click **Console** tab
-3. Copy the entire [`export-chatgpt-console.js`](https://raw.githubusercontent.com/Minamaged18/chatgpt_chats_extractor/main/export-chatgpt-console.js) file, **paste it in the console**, press **Enter**
-4. Wait for the list to load → a popup appears with checkboxes
-5. Pick which conversations you want, click **Export Selected**
-6. A ZIP file downloads automatically with `chatgpt-export.zip`
-
-### Terminal (Node.js or Python)
+### 1. Start the server
 
 ```bash
 git clone https://github.com/Minamaged18/chatgpt_chats_extractor.git
 cd chatgpt_chats_extractor
-node export-chatgpt.mjs
+python3 serve.py
 ```
 
-A browser opens at `http://127.0.0.1:8423` — paste your session token from `chatgpt.com/api/auth/session` → exports everything to `~/Desktop/chatgpt-export/`.
+You'll see a message like `Exporter Server running`.
 
-**Note:** The terminal version may get blocked by Cloudflare. Use the browser console instead if that happens.
+### 2. Go to ChatGPT or Perplexity
 
----
+Go to the site and **log in**.
 
-## Perplexity
+### 3. Open the console and paste
 
-### Browser Console (no server needed)
+Press **F12** → **Console** tab, then paste:
 
-1. Go to [perplexity.ai](https://www.perplexity.ai) and **log in**
-2. Press **F12** → click **Console** tab
-3. Copy the entire [`export-perplexity-console.js`](https://raw.githubusercontent.com/Minamaged18/chatgpt_chats_extractor/main/export-perplexity-console.js) file, **paste it in the console**, press **Enter**
-4. Wait for the list to load → a popup appears with checkboxes
-5. Pick which threads you want, click **Export Selected**
-6. A ZIP file downloads automatically with `perplexity-export.zip`
-
-### Terminal (Node.js or Python)
-
-```bash
-git clone https://github.com/Minamaged18/chatgpt_chats_extractor.git
-cd chatgpt_chats_extractor
-node export-perplexity.mjs
+**For ChatGPT:**
+```js
+fetch("http://127.0.0.1:8425/export-chatgpt-console.js").then(r=>r.text()).then(eval)
 ```
 
-A browser opens at `http://127.0.0.1:8424` — paste your `__Secure-next-auth.session-token` cookie → exports everything to `~/Desktop/perplexity-export/`.
+**For Perplexity:**
+```js
+fetch("http://127.0.0.1:8425/export-perplexity-console.js").then(r=>r.text()).then(eval)
+```
 
-**Getting the cookie:** F12 → Application → Cookies → perplexity.ai → find `__Secure-next-auth.session-token` → copy its value.
+### 4. Select and export
 
-**Note:** The terminal version may get blocked by Cloudflare. Use the browser console instead.
+A popup shows your conversations with checkboxes. Pick what you want → click **Export Selected** → ZIP downloads automatically.
 
 ---
 
@@ -80,11 +64,27 @@ Open any `.html` file in a browser to browse your conversations.
 
 ---
 
+## Terminal (no browser console)
+
+If you prefer not to use the browser console:
+
+```bash
+cd chatgpt_chats_extractor
+node export-chatgpt.mjs          # for ChatGPT
+node export-perplexity.mjs       # for Perplexity
+```
+
+Opens a web UI where you paste your token/cookie. Exports everything (no selection UI). May be blocked by Cloudflare.
+
+---
+
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| 403 error (terminal) | Use the browser console version instead |
-| Token/cookie expired | Re-copy and try again |
-| HTML pages look unstyled | Internet access needed once for CDN styling |
+| `Unexpected token 'export'` | Don't paste raw code — use the `fetch(...).then(...).then(eval)` one-liner above |
+| `ERR_CONNECTION_REFUSED` | Make sure `python3 serve.py` is running |
+| `Failed to fetch` / CORS error | Make sure you're using `http://127.0.0.1:8425` (not `localhost`) |
+| 403 error (terminal mode) | Cloudflare blocking — use the browser console method instead |
+| Token/cookie expired | Re-login and try again |
 | Python not found | `xcode-select --install` (macOS) or `sudo apt install python3` (Linux) |
